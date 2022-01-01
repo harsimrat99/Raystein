@@ -1,0 +1,27 @@
+# depslib dependency file v1.0
+1640759011 source:d:\desktop\angad\codes\cg\game\main.cpp
+	<tchar.h>
+	<windows.h>
+	"Game.h"
+	<math.h>
+	<iostream>
+	<commctrl.h>
+
+1640995843 source:d:\desktop\angad\codes\cg\game\src\game.cpp
+	"Game.h"
+
+1640557982 source:d:\desktop\angad\codes\cg\game\src\graphics2d.cpp
+	"Graphics2D.h"
+
+1640547743 source:d:\desktop\angad\codes\cg\game\src\world.cpp
+	"World.h"
+
+1640723956 source:d:\desktop\angad\codes\cg\game\src\map.cpp
+	"Map.h"
+
+1640998286 source:d:\desktop\angad\codes\cg\game\src\graphics.cpp
+	"Graphics.h"
+
+1640994206 source:d:\desktop\angad\codes\cg\game\src\raycaster.cpp
+	"Raycaster.h"
+
