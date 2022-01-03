@@ -21,7 +21,7 @@ HWND hTrack, hMain;
 
 int AddControls(HWND);
 
-int tickRate = 37;
+int tickRate = 10;
 
 /*  Make the class name into a global variable  */
 TCHAR szClassName[ ] = _T("BIGCHUNGUS");

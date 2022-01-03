@@ -94,7 +94,7 @@ void Raycaster::calculateConstraints()
     // The width of the view plan divided by the
     divAngle = (2.0f * depth) / m_resolution;
     //Distance from the projection screen to the player
-    distanceFromScreen = (this->width/2) * tan(depth) + 150;
+    distanceFromScreen = (this->width/2) / tan(depth);
     std::cout << width << " " << height << " " << (float) this->depth << " " << (float) this->divAngle << " " << (float) this->distanceFromScreen << std::endl;
 
 }
@@ -113,12 +113,10 @@ std::vector < std::vector < std::pair <float, float> > >& Raycaster::getIntersec
         int last_h = hcords.size() - 1;
         int last_v = vcords.size() - 1;
 
-        calculated_positions[i] = {  vcords[last_v] };
-
         float mag_h = abs ( player_x - hcords[ last_h ].first ) + abs ( player_y - hcords[ last_h ].second );
         float mag_v = abs ( player_x - vcords[ last_v ].first ) + abs ( player_y - vcords[ last_v ].second );
 
-        std::vector <std::pair<float,float>> v;
+         std::vector <std::pair<float,float>> v;
 
         if ( (mag_v) > (mag_h) )
         {

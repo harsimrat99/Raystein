@@ -24,8 +24,8 @@ class Game
         virtual ~Game();
         void update(bool);
         void drawMap();
-        int player_x = 78;
-        int player_y = 68;
+        int player_x = 150;
+        int player_y = 150;
         float p_angle = PI/2;
         void calcDist(float,bool);
         bool displayMap = true;
@@ -50,10 +50,14 @@ class Game
         PAINTSTRUCT ps;
         HDC Memhdc;
 
+        //image
+        ID2D1Bitmap* bmp;
+        ID2D1Bitmap* bmp2;
+
         //Keeping track of world co-ordinates
         int mapX;
         int mapY;
-        float map_scale = 8;
+        float map_scale = 12;
 
         //dimension of a map block
         int block_square_dimension = 64;

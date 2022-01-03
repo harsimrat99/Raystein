@@ -66,6 +66,25 @@ Graphics::Graphics(HWND handle)
         m_pTextFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
     }
 
+    if (SUCCEEDED(hr))
+    {
+
+        using namespace D2D1;
+
+        D2D1_GRADIENT_STOP stops[] =
+        {
+            { 0.0f, ColorF(ColorF::DarkCyan) },
+            { 1.0f, ColorF(ColorF::LightBlue) }
+        };
+
+        m_pRenderTarget->CreateGradientStopCollection(stops, _countof(stops),
+                &collection);
+
+        D2D1_LINEAR_GRADIENT_BRUSH_PROPERTIES props = {};
+
+        m_pRenderTarget->CreateLinearGradientBrush(&props, NULL, collection, &m_pGradientBrush);
+
+    }
 
 }
 
@@ -77,6 +96,7 @@ Graphics::~Graphics()
     SafeRelease(&m_pLightSlateGrayBrush);
     SafeRelease(&m_pDWriteFactory);
     SafeRelease(&m_pTextFormat);
+    delete collection;
 
 }
 
@@ -143,6 +163,25 @@ void Graphics::drawRect(float x, float y, float w, float h)
                             );
 
     m_pRenderTarget->DrawRectangle(&rectangle, m_pLightSlateGrayBrush);
+
+}
+
+void Graphics::drawGradientRect(float x, float y, float w, float h)
+{
+
+    D2D1_RECT_F rectangle = D2D1::RectF(
+                                x,
+                                getTargetHeight() - y - h,
+                                x+w,
+                                getTargetHeight() - y
+                            );
+
+    m_pGradientBrush->SetStartPoint(D2D1::Point2F(x+w/2, getTargetHeight() - y - h));
+
+    m_pGradientBrush->SetEndPoint(D2D1::Point2F(x+w/2,
+                                       getTargetHeight() - y));
+
+    m_pRenderTarget->FillRectangle(&rectangle, m_pGradientBrush);
 
 }
 
@@ -259,6 +298,28 @@ ID2D1Bitmap* Graphics::loadImage(LPCWSTR imageFile)
 
 }
 
+void Graphics::drawBitmapSlice(ID2D1Bitmap* bitmap, float x, float y, float destWidth, float destHeight, int imageWidth, int imageHeight, int offset)
+{
+
+    D2D1_POINT_2F dest = D2D1::Point2F(x, getTargetHeight() - y);
+    auto destination = D2D1::RectF(
+                           dest.x,
+                           getTargetHeight() - y - destHeight,
+                           dest.x + destWidth,
+                           getTargetHeight() - y);
+
+    auto source = D2D1::RectF(offset-1, imageHeight, offset, 0);
+
+    m_pRenderTarget->DrawBitmap(
+        bitmap,
+        destination,
+        1.0f,
+        D2D1_BITMAP_INTERPOLATION_MODE_LINEAR,
+        source
+    );
+
+}
+
 void Graphics::drawBitmap( ID2D1Bitmap* bitmap, float x, float y, int w, int h )
 {
 
@@ -280,10 +341,10 @@ void Graphics::drawFillEllipse(float x, float y, float r)
 {
 
     m_pRenderTarget->FillEllipse(D2D1::Ellipse(
-        D2D1::Point2F(x, getTargetHeight() - y),
-        r,
-        r
-    ), m_pLightSlateGrayBrush);
+                                     D2D1::Point2F(x, getTargetHeight() - y),
+                                     r,
+                                     r
+                                 ), m_pLightSlateGrayBrush);
 
 }
 
@@ -291,10 +352,10 @@ void Graphics::drawEllipse(float x, float y, float r)
 {
 
     m_pRenderTarget->DrawEllipse(D2D1::Ellipse(
-        D2D1::Point2F(x, getTargetHeight() - y),
-        r,
-        r
-    ), m_pLightSlateGrayBrush, m_stroke_width);
+                                     D2D1::Point2F(x, getTargetHeight() - y),
+                                     r,
+                                     r
+                                 ), m_pLightSlateGrayBrush, m_stroke_width);
 
 }
 

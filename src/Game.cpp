@@ -38,7 +38,7 @@ Game::Game(HWND handle, int width, int height, int x, int y) : width(width), hei
 
     windowHandle = CreateWindowEx(0, szClassName, _T("Big Chunugs 3: Revenge of the son"),WS_EX_LAYERED | WS_CHILD | WS_VISIBLE, x,y, width, height, handle, NULL, NULL, NULL);
 
-    myMap = new Map(std::string("res/mad.txt"));
+    myMap = new Map(std::string("res/map/mad.txt"));
 
     m_hdc = GetDC(windowHandle);
 
@@ -51,6 +51,12 @@ Game::Game(HWND handle, int width, int height, int x, int y) : width(width), hei
     mapY = 0;
 
     r = new Raycaster(myMap, block_square_dimension, width, height);
+
+    bmp = g2d->loadImage(L"res/images/wall.bmp");
+
+    bmp2 = g2d->loadImage(L"res/images/tail.png");
+
+    PlaySound(TEXT("res/sounds/recycle.wav"), NULL, SND_FILENAME | SND_ASYNC);
 
 }
 
@@ -65,6 +71,10 @@ Game::~Game()
     delete myMap;
 
     delete r;
+
+    delete bmp;
+
+    delete bmp2;
 
 }
 
@@ -110,11 +120,13 @@ void Game::update(bool debug)
 
     g2d->beginDraw();
 
-    g2d->clear();
+    g2d->fill(255,255,255);
+
+    g2d->drawFillRect(0,height/2, width, height/2);
+
+    g2d->drawGradientRect(0,0, width, height/2);
 
     auto vectors = r->getIntersections(player_x, player_y);
-
-    g2d->fill(255,255,255);
 
     int i =0;
     for (auto intersection_vector : vectors)
@@ -126,9 +138,10 @@ void Game::update(bool debug)
             float dist = sqrt3( (player_x - intersection.first)*(player_x - intersection.first) + (player_y - intersection.second)*(player_y - intersection.second) );
             float sliceH = block_square_dimension / dist * distScreen;
 
-            float proj = distScreen /(dist + 1);
-            g2d->fill(0, proj, 0);
-            g2d->drawLine(width - i, height/2 - (sliceH/2), width - i, height/2 + (sliceH/2));
+            int offset_x = (int) intersection.first % block_square_dimension;
+            int offset_y = (int) intersection.second % block_square_dimension;
+
+            g2d->drawBitmapSlice(bmp, width - i, height/2 - (sliceH/2), 2, sliceH, 2, 64, offset_x ? offset_x + 1 : offset_y + 1);
 
         }
 
@@ -145,6 +158,10 @@ void Game::update(bool debug)
 void Game::drawMap()
 {
 
+    g2d->fill(255,255,255);
+    g2d->drawFillRect(mapX, mapY, myMap->getRows() * map_size , myMap->getRows() * map_size );
+
+    g2d->fill(0,0,0);
     for (int i = 0; i < myMap->getRows(); i++)
     {
 
@@ -153,37 +170,15 @@ void Game::drawMap()
 
             if (myMap->getData(j,i) == 'W')
             {
-
-                g2d->fill(0,0,0);
-
-            }
-            else
-            {
-                g2d->fill(0,0,255);
+                g2d->drawFillRect(mapX + map_size*(j), mapY + map_size*i, map_size, map_size);
             }
 
-            g2d->drawFillRect(mapX + map_size*(j), mapY + map_size*i, map_size, map_size);
         }
 
     }
 
-    g2d->fill(255,255,255);
-
-    for (int i = 0; i <= myMap->getRows() - 1; i++)
-    {
-
-        g2d->drawLine(mapX, mapY + map_size*(i+1), mapX + map_size * myMap->getCols(), mapY + map_size*(i+1));
-
-    }
-
-    for (int i = 0; i <= myMap->getCols(); i++)
-    {
-
-        g2d->drawLine(mapX + map_size * i, mapY, mapX + map_size*i, mapY + map_size * myMap->getCols());
-
-    }
-
     g2d->fill(255,0,0);
+
     g2d->drawFillEllipse(mapX + player_x/map_scale, mapY + player_y/map_scale, 2);
 
     g2d->drawLine(mapX + player_x/map_scale, mapY + player_y/map_scale, mapX + player_x/map_scale + cos(r->getPlayerAngle())*5, mapY + player_y/map_scale + sin(r->getPlayerAngle())*5 );
@@ -208,6 +203,8 @@ float clip(float n, float lower, float upper)
 
 void Game::handleInput(WPARAM input, LPARAM args)
 {
+
+    static int last_play = -1;
 
     int displacement = 5;
     auto p_a = r->getPlayerAngle();
@@ -245,7 +242,7 @@ void Game::handleInput(WPARAM input, LPARAM args)
     }
     else if ( !(state_up & 0x01) && (state_left & 0x01) && !(state_right & 0x01))
     {
-       r->increasePlayerAngle();
+        r->increasePlayerAngle();
     }
     else if ( !(state_up & 0x01) && !(state_left & 0x01) && (state_right & 0x01))
     {
@@ -259,6 +256,12 @@ void Game::handleInput(WPARAM input, LPARAM args)
     {
         player_x = cx;
         player_y = cy;
+        if (GetTickCount() - last_play > 2000 )
+        {
+            PlaySound(TEXT("res/sounds/thud.wav"), NULL, SND_FILENAME | SND_ASYNC);
+            last_play = GetTickCount();
+        }
+
     }
 
 }
